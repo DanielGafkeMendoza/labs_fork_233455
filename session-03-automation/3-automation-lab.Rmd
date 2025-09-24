@@ -85,13 +85,15 @@ Sometimes we want to perform the same analysis on different groups in our data. 
 
 **Nesting** is a powerful technique that helps us organize grouped data. When we nest data:
 
+we want to group data in a dataframe and then pack it in a cell
+
 1. We group our data by some variable(s)
 2. All the remaining data for each group gets "packed" into a special list-column
 3. Each row now represents one group, with all that group's data stored in the list-column
 
-```r
+```{r}
 # Before nesting: regular dataframe
-penguins
+library(tidyverse) 
 #> species    bill_length_mm  bill_depth_mm  ...
 #> Adelie     39.1           18.7           ...  
 #> Adelie     39.5           17.4           ...
@@ -118,6 +120,7 @@ Let's look at our penguin dataset again as an example.
 library(palmerpenguins)
 library(tidyverse)
 data(penguins)
+View(penguins)
 ```
 
 :::alert-info
@@ -126,6 +129,9 @@ Group the penguins by species and nest the remaining data into a column called d
 
 ```{r, echo= FALSE, eval= FALSE}
 # Your code here: Use group_by() and nest()
+penguins_nested <- penguins |>
+  group_by(species) |>
+  nest()
 ```
 :::
 :::alert-info
@@ -137,8 +143,13 @@ Write a function called `summarize_bills` that takes a dataframe and returns:
 
 ```{r, echo= FALSE, eval= FALSE}
 summarize_bills <- function(df) {
+  df|>
+    summarise(count = n(),
+              mean_bill_length = mean(bill_length_mm, na.rm = TRUE),
+              max_bill_length = max(bill_length_mm, na.rm = TRUE))
   # Your code here: use summarise() to create the three variables
 }
+
 
 # Test your function on the first species
 summarize_bills(penguins_nested$data[[1]])
@@ -149,10 +160,14 @@ summarize_bills(penguins_nested$data[[1]])
 Add a new column called `bill_stats` to `penguins_nested` that applies your `summarize_bills` function to each nested dataframe using `map()`:
 
 ```{r, echo= FALSE, eval= FALSE}
-penguins_nested <- penguins_nested %>%
+penguins_nested <- penguins_nested |>
+  mutate(bill_stats = map(data, summarize_bills)) # data???
+
+
   # Your code here: mutate() with map()
 
 # Look at the result
+penguins_nested
 penguins_nested
 ```
 
@@ -162,7 +177,9 @@ penguins_nested
 Create a clean summary table by selecting just `species` and `bill_stats`, then unnesting:
 
 ```{r, echo= FALSE, eval= FALSE}
-penguins_summary <- penguins_nested %>%
+penguins_summary <- penguins_nested |>
+  select("species", "bill_stats") |>
+  unnest("bill_stats")
   # Your code here: select() and unnest()
 
 penguins_summary
@@ -174,8 +191,13 @@ penguins_summary
 Write the complete pipeline from the original `penguins` data to the final summary in one go:
 
 ```{r, echo= FALSE, eval= FALSE}
-final_summary <- penguins %>%
-  # Your complete pipeline here
+final_summary <- penguins |>
+  group_by(species) |>
+  nest() |>
+  mutate(bill_stats = map(data, summarize_bills)) |>
+  select("species", "bill_stats") |>
+  unnest()
+
 
 final_summary
 ```
@@ -221,7 +243,7 @@ To work with this example I have created all the files and folders as above in t
 
 :::alert-info
 **Exercise 1**
-Can you add a new script that creates a summary table of the words spoken by Species and Film and saves it to the `outputs/tables/` folder? You can use the `dplyr` package to create the summary table and the `write_tsv()` function to save it as a .tsv file. Don't forget to source your new script in the `Makefile.R` script.
+
 :::
 
 :::alert-info
