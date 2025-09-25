@@ -10,9 +10,11 @@ View(lotr_dat)
 # create the summary table and the `write_tsv()` function to save it as a .tsv file. 
 # Don't forget to source your new script in the `Makefile.R` script.
 
-words_data <- lotr_dat |>
+words_data_summary_table <- lotr_dat |>
   group_by(Film, Species) |>
-  summarize(words_spoken = sum(Words), .groups = "drop")
+  summarize(
+    Characters = n(), words_spoken = sum(Words),
+    .groups = "drop")
 
 words_data_table <- summary_table(
   lotr_dat |>
@@ -22,7 +24,7 @@ words_data_table <- summary_table(
 
 print(words_data_table)
 
-write_tsv(words_data, file = "./session-03-automation/lotr_project/data/processed/words_by_film_and_species.tsv")
+write_tsv(words_data_summary_table, file = "./session-03-automation/lotr_project/data/processed/words_by_film_and_species.tsv")
 
 View(words_data)
 
