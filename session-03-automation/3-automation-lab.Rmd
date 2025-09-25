@@ -161,13 +161,12 @@ Add a new column called `bill_stats` to `penguins_nested` that applies your `sum
 
 ```{r, echo= FALSE, eval= FALSE}
 penguins_nested <- penguins_nested |>
-  mutate(bill_stats = map(data, summarize_bills)) # data???
+  mutate(bill_stats = map(data, summarize_bills)) # data: because the single dataframes in penguins_nested are called that now 
 
 
   # Your code here: mutate() with map()
 
 # Look at the result
-penguins_nested
 penguins_nested
 ```
 
@@ -243,7 +242,10 @@ To work with this example I have created all the files and folders as above in t
 
 :::alert-info
 **Exercise 1**
-
+Can you add a new script that creates a summary table of the words spoken by Species
+and Film and saves it to the `outputs/tables/` folder? You can use the `dplyr` package to
+create the summary table and the `write_tsv()` function to save it as a .tsv file. 
+Don't forget to source your new script in the `Makefile.R` script.
 :::
 
 :::alert-info
@@ -255,6 +257,10 @@ Update the `Makefile.R` script so that it also clears out the table you created 
 **Exercise 3**
 Do your new script and the 03-plot.R script need to be run sequentially? How could we think about these two script in terms of the pipeline graphs you saw in the lecture?
 :::
+
+would probably integrate the script in the process data file
+
+
 
 ## Scheduling with `cronR` and `taskscheduleR` `r emo::ji("calendar")`
 Now that we have a working pipeline, let's learn how to schedule it to run automatically!
