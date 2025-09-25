@@ -12,8 +12,15 @@ View(lotr_dat)
 
 words_data <- lotr_dat |>
   group_by(Film, Species) |>
-  summarize(words_spoken = sum(Words)) |>
-  .groups = drop()
+  summarize(words_spoken = sum(Words), .groups = "drop")
+
+words_data_table <- summary_table(
+  lotr_dat |>
+    group_by(Film, Species) |>
+    summarize(words_spoken = sum(Words), .groups = "drop")
+)  
+
+print(words_data_table)
 
 write_tsv(words_data, file = "./session-03-automation/lotr_project/data/processed/words_by_film_and_species.tsv")
 
