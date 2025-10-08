@@ -125,6 +125,7 @@ library(rvest)
 library(stringr)
 library(tidyverse)
 library(here)
+library(xml2)
 ```
 
 **Step 2.** Parse the page source. If encoding is necessary, you can add it in the reading html step.
@@ -225,7 +226,9 @@ Your task is to extract the second paragraph from the "Roman Cologne" section of
 ::: 
 
 ```{r}
-# YOUR ANSWER HERE
+parsed_url |> 
+  rvest::html_elements(xpath = '//*[@id="mw-content-text"]/div[1]/p[7]') |> 
+  rvest::html_text()
 
 ```
 
@@ -267,6 +270,18 @@ spotify_table <- spotify_table_raw |>
   dplyr::select(-ref) # drop ref col
 
 head(spotify_table)
+
+# minimum number of streams
+spotify_table |>
+  select(streams_billions) |>
+  min()
+
+# highest number of streamed songs
+spotify_table |> 
+  group_by(artist_s) |> 
+  summarise(songs_n = n(), 
+            total_streams_billions = sum(streams_billions)) |> 
+  arrange(desc(total_streams_billions))
 ```
 
 
@@ -489,7 +504,7 @@ httr::GET(paste0(baseurl, query)) |> # Make API call
   httr::content(as = 'text') |> # extract content as text
   jsonlite::fromJSON() |> 
   purrr::pluck(4) |> 
-  head(1)
+  head(5)
 ```
 
 
