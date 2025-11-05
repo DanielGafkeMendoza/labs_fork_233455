@@ -200,13 +200,21 @@ Once we have our scatter plot, adapt the code to:
 
 
 ```{r, figures-side, fig.show="hold",  warning=F}
+library(gapminder)
+library(tidyverse)
+library(palmerpenguins)
 ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g)) +
   geom_point() + 
   labs(title = "Basic plot")
 ```
 
 ```{r}
-# YOUR CODE HERE
+advanced_scatter <- ggplot(penguins, aes(x = flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point() + 
+  labs(title = "Basic plot", x = "Flipper Length", y = "Body Mass in grams") +
+  theme_minimal()
+
+advanced_scatter
 ```
 
 
@@ -231,7 +239,11 @@ If we are interested in plotting distributions of our data, we can leverage geom
 Histograms show the distribution of continuous variables. In this first example, we graph the distribution of the life expectancy variable (i.e., `lifeExp`) from the gapminder dataset.
 
 ```{r, warning = F, message = F, fig.height = 3}
-summary(df$lifeExp)
+summary(gapminder)
+
+summary(gapminder$lifeExp)
+
+df <- gapminder
 
 ggplot(df,
        aes(x = lifeExp)) +
@@ -247,14 +259,16 @@ The default number of bins is 30, which means that the entire range of the varia
 max(df$lifeExp) - min(df$lifeExp) # the range is approx 60 years
 
 ggplot(df, aes(x = lifeExp)) +
-  geom_histogram(bins = 60)
+  geom_histogram(bins = 20)
 ```
 
 What would happen if we specified 5 bins? Try it out. 
 
 
 ```{r}
-# YOUR CODE HERE
+ggplot(df, aes(x = lifeExp)) +
+  geom_histogram(bins = 15)
+
 ```
 
 
@@ -330,14 +344,30 @@ Create a histogram showing the distribution of penguin body mass using the `peng
 1. Experiment with different geoms by replacing geom_histogram() with options like geom_density(), geom_bar(), or others.
 
 ```{r}
-# YOUR CODE HERE
+ggplot(penguins, aes(x=body_mass_g)) +
+  geom_histogram(bins = 18, fill = "#FF6666")
+
+ggplot(penguins, aes(x=body_mass_g)) +
+  geom_boxplot(fill = "red")
+
+ggplot(penguins, aes(x=body_mass_g)) +
+  geom_density(color = "blue")
+
+ggplot(penguins, aes(x=body_mass_g)) +
+  geom_bar(color = "blue")
 
 ```
 
 1. Now, look for a variable in the dataset that can be used to meaningfully group body mass. Use that variable to create a box plot or violin plot of body mass.
 
 ```{r}
-# YOUR CODE HERE
+View(penguins)
+
+ggplot(penguins, aes(x=body_mass_g, y = sex)) +
+  geom_boxplot(fill = "green")
+
+ggplot(penguins, aes(x=body_mass_g, y = species)) +
+  geom_violin(fill = "orange")
 ```
 
 
@@ -560,6 +590,9 @@ Using color scales from the `viridis` package is a favorite among many who use `
 Second, we know that the correlation coefficient ranges from -1 to 1. We only have positive values here and they range from approximately 0.3 to 0.9. It is good practice to show at least one end point of the possible values in legends or axes. Therefore, below we extend the legend to display values from 0 to 1.
 
 ```{r, fig.show="hold",  warning=F, message=F}
+install.packages("viridis")
+library(viridis)
+
 ggplot(cors, aes(x = year, y = continent, fill = cor)) +
   geom_tile() +
   scale_fill_viridis(option = "inferno", name = "Correlation")
@@ -624,7 +657,7 @@ ggplot(globalpop, aes(x = year, y = pop_tot, fill = continent)) +
 # separate bars
 ggplot(globalpop,
        aes(x = year, y = pop_tot, fill = continent)) +
-  geom_col(position = position_dodge()) +
+  geom_col(position = position_dodge()) + # dodge to avoid stacked bars 
   theme_minimal()
 ```
 
@@ -670,7 +703,14 @@ ggplot(subset(diff07, continent == "Europe" & year == 2007),
 Create a scatter plot to explore the relationship between `flipper_length_mm` and `body_mass_g`. Then, color by a grouping variable (of your choice) and add linear trend lines.
 
 ```{r}
-# YOUR CODE HERE
+ggplot(penguins, aes (x= flipper_length_mm, y = body_mass_g, color = species)) +
+  geom_point() +
+  geom_smooth(method = "lm") +
+  labs(x= "flipper length in mm", y = "body mass in grams", title = "Body mass vs. flipper length")
+
+ggplot(penguins, aes (x= flipper_length_mm, y = body_mass_g, color = sex)) +
+  geom_point() +
+  geom_smooth(method = "lm") 
 ```
 
 ---
@@ -963,8 +1003,23 @@ ggplot(subset(df, continent != "Oceania"),
 Create a plot to compare the GDP per capita development of the BRICS countries (Brazil, Russia, India, China, South Africa). Unfortunately, Russia (or previously the Soviet Union) is not part of the `gapminder` data, so we cannot display it in the plot.
 
 
-```{r}
-# YOUR CODE HERE
+```{r, warning = F, message = F, fig.height = 9, fig.width = 8}
+df_brics <- df|>
+  subset(country %in% c("Brazil", "India", "China", "South Africa"))
+
+View(df_brics)
+
+ggplot(df_brics, aes(x = year, y = gdpPercap)) +
+  geom_line() +
+  geom_point() +
+  labs(title = "development of GDP per capita 1952-2007",
+       subtitle = "Data source: Gapminder package",
+       x = "Year",
+       y = "Gdp per capita in USD") +
+  theme_bw() +
+  scale_x_continuous(breaks = seq(1950, 2000, 25)) +
+  facet_grid(~ country)
+
 
 ```
 
@@ -996,6 +1051,8 @@ Manually, you could also visit the `Plots` pane in the RStudio interface and exp
 Oftentimes, we want our plots not only to be displayed side by side in an html output, but we actually want to save it as a two (or more) image file. The function `grid.arrange()` from the `gridExtra` package - see this [vignette](https://cran.r-project.org/web/packages/egg/vignettes/Ecosystem.html) for more information- can be very helpful here.
 
 ```{r, warning = F, message = F, fig.height = 2, fig.width = 5}
+install.packages("gridExtra")
+library(gridExtra)
 p1 <- ggplot(df, aes(x = lifeExp)) +
   geom_density()
 
